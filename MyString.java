@@ -22,7 +22,9 @@ public class MyString {
     public static int countChar(String inputStr, char targetChar) {
 
         int occurrenceCount = 0;
-
+        if (!(inputStr instanceof String) || (inputStr.length() == 0)) {
+            return 0;
+        }
         for (int i = 0; i < inputStr.length(); i++) {
 
             if (inputStr.charAt(i) == targetChar) {

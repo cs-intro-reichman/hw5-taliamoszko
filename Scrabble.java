@@ -1,61 +1,19 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 
 public class Scrabble {
 
     // Letter values as provided in the problem
     private static final int[] LETTER_VALUES = {
-        1, 3, 3, 2, 1, 4, 2, 4, 1, 8, 5, 1, 3, 1, 3, 10, 1, 1, 1, 1, 4, 4, 8, 4, 10
+            1, 3, 3, 2, 1, 4, 2, 4, 1, 8, 5, 1, 3, 1, 3, 10, 1, 1, 1, 1, 4, 4, 8, 4, 10
     };
 
     // The dictionary file for the Scrabble game
     static final String WORDS_FILE = "dictionary.txt";
 
-    // Maximum number of possible words in the Scrabble game
-    static int MAX_NUMBER_OF_WORDS = 100000;
-
-    // Array to hold the dictionary words
-    static String[] DICTIONARY = new String[MAX_NUMBER_OF_WORDS];
-
-    // The actual number of words in the dictionary
-    static int NUM_OF_WORDS = 0;
-
-    // MyString class for handling the hand of letters
-    public static class MyString {
-        private String letters;
-
-        public MyString(String letters) {
-            this.letters = letters;
-        }
-
-        // Check if a word can be formed from the letters in the hand
-        public boolean canFormWord(String word) {
-            String temp = letters;
-            for (int i = 0; i < word.length(); i++) {
-                char letter = word.charAt(i);
-                if (temp.indexOf(letter) == -1) {
-                    return false;
-                }
-                temp = temp.replaceFirst(String.valueOf(letter), "");
-            }
-            return true;
-        }
-
-        // Remove a word from the hand
-        public void removeWord(String word) {
-            for (int i = 0; i < word.length(); i++) {
-                char letter = word.charAt(i);
-                letters = letters.replaceFirst(String.valueOf(letter), "");
-            }
-        }
-
-        // Return the current letters in the hand
-        public String getLetters() {
-            return letters;
-        }
-    }
+    // List to hold the dictionary words
+    static List<String> DICTIONARY = new ArrayList<>();
 
     // Initialize the dictionary with words from the file
     public static void init() {
@@ -63,16 +21,10 @@ public class Scrabble {
             Scanner scanner = new Scanner(new File(WORDS_FILE));
             System.out.println("Loading word list from file...");
 
-            NUM_OF_WORDS = 0;
             while (scanner.hasNext()) {
-                DICTIONARY[NUM_OF_WORDS++] = scanner.next().toLowerCase(); // Make all words lowercase
+                DICTIONARY.add(scanner.next().toLowerCase()); // Make all words lowercase
             }
-            System.out.println(NUM_OF_WORDS + " words loaded.");
-
-            // Debugging: Print the first few words loaded
-            for (int i = 0; i < Math.min(10, NUM_OF_WORDS); i++) {
-                //System.out.println("Loaded word: " + DICTIONARY[i]);
-            }
+            System.out.println(DICTIONARY.size() + " words loaded.");
         } catch (FileNotFoundException e) {
             System.out.println("Error reading dictionary file: " + e.getMessage());
         }
@@ -80,13 +32,7 @@ public class Scrabble {
 
     // Check if a word is in the dictionary
     public static boolean isValidWord(String word) {
-        word = word.toLowerCase(); // Ensure case-insensitivity
-        for (int i = 0; i < NUM_OF_WORDS; i++) {
-            if (DICTIONARY[i].equals(word)) {
-                return true;
-            }
-        }
-        return false;
+        return DICTIONARY.contains(word.toLowerCase());
     }
 
     // Calculate the score of a word
@@ -121,13 +67,13 @@ public class Scrabble {
         Random random = new Random();
         StringBuilder hand = new StringBuilder();
 
-        // Generate 8 random letters
-        for (int i = 0; i < 8; i++) {
+        // Generate 6 random letters
+        for (int i = 0; i < 6; i++) {
             int index = random.nextInt(alphabet.length());
             hand.append(alphabet.charAt(index));
         }
 
-        // Insert 'a' and 'e' randomly
+        // Add 'a' and 'e' to the hand
         hand.append('a');
         hand.append('e');
 
@@ -146,6 +92,48 @@ public class Scrabble {
             shuffled.setCharAt(j, temp);
         }
         return shuffled.toString();
+    }
+
+    // MyString class for handling the hand of letters
+    public static class MyString {
+        private Map<Character, Integer> letterCount;
+
+        public MyString(String letters) {
+            letterCount = new HashMap<>();
+            for (char c : letters.toCharArray()) {
+                letterCount.put(c, letterCount.getOrDefault(c, 0) + 1);
+            }
+        }
+
+        // Check if a word can be formed from the letters in the hand
+        public boolean canFormWord(String word) {
+            Map<Character, Integer> tempCount = new HashMap<>(letterCount);
+            for (char c : word.toCharArray()) {
+                if (tempCount.getOrDefault(c, 0) <= 0) {
+                    return false;
+                }
+                tempCount.put(c, tempCount.get(c) - 1);
+            }
+            return true;
+        }
+
+        // Remove a word from the hand
+        public void removeWord(String word) {
+            for (char c : word.toCharArray()) {
+                letterCount.put(c, letterCount.get(c) - 1);
+            }
+        }
+
+        // Return the current letters in the hand
+        public String getLetters() {
+            StringBuilder letters = new StringBuilder();
+            for (Map.Entry<Character, Integer> entry : letterCount.entrySet()) {
+                for (int i = 0; i < entry.getValue(); i++) {
+                    letters.append(entry.getKey());
+                }
+            }
+            return letters.toString();
+        }
     }
 
     // Play the hand

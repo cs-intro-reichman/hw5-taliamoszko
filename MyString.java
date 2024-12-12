@@ -3,29 +3,29 @@
  */
 public class MyString {
     public static void main(String args[]) {
-        String sampleText = "hello";
-        System.out.println(countCharacterOccurrence(sampleText, 'h'));
-        System.out.println(countCharacterOccurrence(sampleText, 'l'));
-        System.out.println(countCharacterOccurrence(sampleText, 'z'));
-        System.out.println(addSpacesBetweenChars(sampleText));
+        String greeting = "hello";
+        System.out.println(countOccurrences(greeting, 'h'));
+        System.out.println(countOccurrences(greeting, 'l'));
+        System.out.println(countOccurrences(greeting, 'z'));
+        System.out.println(insertSpaces(greeting));
         //// Put your other tests here.
     }
 
     /**
      * Returns the number of times the given character appears in the given string.
-     * Example: countCharacterOccurrence("Center",'e') returns 2 and countCharacterOccurrence("Center",'c') returns 0. 
+     * Example: countOccurrences("Center",'e') returns 2 and countOccurrences("Center",'c') returns 0.
      * 
-     * @param inputString - a string
+     * @param inputStr - a string
      * @param targetChar - a character
-     * @return the number of times targetChar appears in inputString
+     * @return the number of times targetChar appears in inputStr
      */
-    public static int countCharacterOccurrence(String inputString, char targetChar) {
+    public static int countOccurrences(String inputStr, char targetChar) {
 
         int occurrenceCount = 0;
 
-        for (int i = 0; i < inputString.length(); i++) {
+        for (int i = 0; i < inputStr.length(); i++) {
 
-            if (inputString.charAt(i) == targetChar) {
+            if (inputStr.charAt(i) == targetChar) {
 
                 occurrenceCount++;
             }
@@ -34,63 +34,64 @@ public class MyString {
         return occurrenceCount;
     }
 
-    /** Returns true if str1 is a subset string str2, false otherwise
-     *  Examples:
-     *  isSubset("sap","space") returns true
-     *  isSubset("spa","space") returns true
-     *  isSubset("pass","space") returns false
-     *  isSubset("c","space") returns true
+    /** 
+     * Returns true if str1 is a subset string of str2, false otherwise
+     * Examples:
+     * subsetOf("sap","space") returns true
+     * subsetOf("spa","space") returns true
+     * subsetOf("pass","space") returns false
+     * subsetOf("c","space") returns true
      *
-     * @param subString - a string
-     * @param mainString - a string
-     * @return true if subString is a subset of mainString, false otherwise
+     * @param smallStr - a string
+     * @param largeStr - a string
+     * @return true if smallStr is a subset of largeStr, false otherwise
      */
-    public static boolean isSubset(String subString, String mainString) {
+    public static boolean isSubset(String smallStr, String largeStr) {
          
-        if (subString.length() > mainString.length()) {
+        if (smallStr.length() > largeStr.length()) {
             return false;
         }
 
-        if (subString.isEmpty()) return true;
+        if (smallStr.isEmpty()) return true;
 
         
-        for (int i = 0; i < subString.length(); i++) {
-            char currentChar = subString.charAt(i); 
+        for (int i = 0; i < smallStr.length(); i++) {
+            char currentChar = smallStr.charAt(i); 
             
-            if (!mainString.contains(Character.toString(currentChar))) {
+            if (!largeStr.contains(Character.toString(currentChar))) {
                 
                 return false;
             }
     
-            mainString = mainString.replaceFirst(Character.toString(currentChar), "");
+            largeStr = largeStr.replaceFirst(Character.toString(currentChar), "");
         }
     
         return true;
     }
 
-    /** Returns a string which is the same as the given string, with a space
+    /** 
+     * Returns a string which is the same as the given string, with a space
      * character inserted after each character in the given string, except
      * for the last character. 
-     * Example: addSpacesBetweenChars("silent") returns "s i l e n t"
+     * Example: insertSpaces("silent") returns "s i l e n t"
      * 
-     * @param inputString - a string
-     * @return a string consisting of the characters of inputString, separated by spaces.
+     * @param inputStr - a string
+     * @return a string consisting of the characters of inputStr, separated by spaces.
      */
-    public static String addSpacesBetweenChars(String inputString) {
+    public static String insertSpaces(String inputStr) {
 
-        String spacedString = "";
+        String spacedStr = "";
        
-        for (int i = 0; i < inputString.length(); i++) {
+        for (int i = 0; i < inputStr.length(); i++) {
             
-            spacedString += inputString.charAt(i);
+            spacedStr += inputStr.charAt(i);
 
-            if (i < inputString.length() - 1) {
-                spacedString += " ";
+            if (i < inputStr.length() - 1) {
+                spacedStr += " ";
             }
-            
         }
 
-        return spacedString;
+        return spacedStr;
     }
   
     /**
@@ -100,63 +101,63 @@ public class MyString {
      * 
      * Example: generateRandomLetters(3) can return "zoo"
      * 
-     * @param n - the number of letters to select
-     * @return a randomly generated string, consisting of 'n' lowercase letters
+     * @param length - the number of letters to select
+     * @return a randomly generated string, consisting of 'length' lowercase letters
      */
-    public static String generateRandomLetters(int n) {
+    public static String generateRandomLetters(int length) {
         
-        String randomString = "";
+        String randomLetters = "";
         
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < length; i++) {
 
-            int randomAsciiValue = (int) (Math.random() * (122 - 97 + 1)) + 97;
-            char randomLetter = (char) randomAsciiValue; 
+            int randomCharCode = (int) (Math.random() * (122 - 97 + 1)) + 97;
+            char randomLetter = (char) randomCharCode; 
 
-            randomString += randomLetter;
+            randomLetters += randomLetter;
 
         }
-        return randomString;
+        return randomLetters;
     }
 
     /**
      * Returns a string consisting of the string str1, minus all the characters in the
      * string str2. Assumes (without checking) that str2 is a subset of str1.
-     * Example: excludeCharacters("meet","committee") returns "comit" 
+     * Example: removeChars("meet","committee") returns "comit" 
      * 
-     * @param str1 - a string
-     * @param str2 - a string
-     * @return a string consisting of str1 minus all the characters of str2
+     * @param inputStr1 - a string
+     * @param inputStr2 - a string
+     * @return a string consisting of inputStr1 minus all the characters of inputStr2
      */
-    public static String excludeCharacters(String str1, String str2) {
+    public static String removeChars(String inputStr1, String inputStr2) {
     
         
-        for (int i = 0; i < str2.length(); i++) {
-            char currentChar = str2.charAt(i); 
+        for (int i = 0; i < inputStr2.length(); i++) {
+            char currentChar = inputStr2.charAt(i); 
             
-            if (str1.contains(Character.toString(currentChar))) {
+            if (inputStr1.contains(Character.toString(currentChar))) {
 
-                str1 = str1.replaceFirst(Character.toString(currentChar), "");
+                inputStr1 = inputStr1.replaceFirst(Character.toString(currentChar), "");
                 
             }
         }
     
-        return str1;
+        return inputStr1;
     }
 
     /**
      * Returns a string consisting of the given string, with the given 
      * character inserted randomly somewhere in the string.
-     * For example, insertAtRandomPosition("s","cat") can return "scat", or "csat", or "cast", or "cats".  
-     * @param ch - a character
-     * @param str - a string
-     * @return a string consisting of str with ch inserted somewhere
+     * For example, insertCharRandomly("s","cat") can return "scat", or "csat", or "cast", or "cats".  
+     * @param randomChar - a character
+     * @param inputStr - a string
+     * @return a string consisting of inputStr with randomChar inserted somewhere
      */
-    public static String insertAtRandomPosition(char ch, String str) {
+    public static String insertCharRandomly(char randomChar, String inputStr) {
         
          
-         int randomIndex = (int) (Math.random() * (str.length() + 1));
-         String updatedString = str.substring(0, randomIndex) + ch + str.substring(randomIndex);
-         return updatedString;
+         int randomIndex = (int) (Math.random() * (inputStr.length() + 1));
+         String resultStr = inputStr.substring(0, randomIndex) + randomChar + inputStr.substring(randomIndex);
+         return resultStr;
     }    
 }
 

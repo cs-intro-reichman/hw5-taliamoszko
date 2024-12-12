@@ -4,10 +4,10 @@
 public class MyString {
     public static void main(String args[]) {
         String greeting = "hello";
-        System.out.println(countOccurrences(greeting, 'h'));
-        System.out.println(countOccurrences(greeting, 'l'));
-        System.out.println(countOccurrences(greeting, 'z'));
-        System.out.println(insertSpaces(greeting));
+        System.out.println(countChar(greeting, 'h'));
+        System.out.println(countChar(greeting, 'l'));
+        System.out.println(countChar(greeting, 'z'));
+        System.out.println(spacedString(greeting));
         //// Put your other tests here.
     }
 
@@ -19,7 +19,7 @@ public class MyString {
      * @param targetChar - a character
      * @return the number of times targetChar appears in inputStr
      */
-    public static int countOccurrences(String inputStr, char targetChar) {
+    public static int countChar(String inputStr, char targetChar) {
 
         int occurrenceCount = 0;
 
@@ -46,7 +46,7 @@ public class MyString {
      * @param largeStr - a string
      * @return true if smallStr is a subset of largeStr, false otherwise
      */
-    public static boolean isSubset(String smallStr, String largeStr) {
+    public static boolean subsetOf(String smallStr, String largeStr) {
          
         if (smallStr.length() > largeStr.length()) {
             return false;
@@ -78,7 +78,7 @@ public class MyString {
      * @param inputStr - a string
      * @return a string consisting of the characters of inputStr, separated by spaces.
      */
-    public static String insertSpaces(String inputStr) {
+    public static String spacedString(String inputStr) {
 
         String spacedStr = "";
        
@@ -104,7 +104,7 @@ public class MyString {
      * @param length - the number of letters to select
      * @return a randomly generated string, consisting of 'length' lowercase letters
      */
-    public static String generateRandomLetters(int length) {
+    public static String randomStringOfLetters(int length) {
        
         String randomLetters = "";
        
@@ -128,7 +128,7 @@ public class MyString {
      * @param inputStr2 - a string
      * @return a string consisting of inputStr1 minus all the characters of inputStr2
      */
-    public static String removeChars(String inputStr1, String inputStr2) {
+    public static String remove(String inputStr1, String inputStr2) {
    
        
         for (int i = 0; i < inputStr2.length(); i++) {

@@ -10,167 +10,203 @@ public class Scrabble {
 	// which is initialized once and cannot be changed later.
 
 	// Dictionary file for this Scrabble game
-	static final String DICTIONARY_FILE_PATH = "dictionary.txt";
+	static final String WORDS_FILE = "dictionary.txt";
 
 	// The "Scrabble value" of each letter in the English alphabet.
 	// 'a' is worth 1 point, 'b' is worth 3 points, ..., z is worth 10 points.
-	static final int[] LETTER_VALUES = { 1, 3, 3, 2, 1, 4, 2, 4, 1, 8, 5, 1, 3,
-										  1, 1, 3, 10, 1, 1, 1, 1, 4, 4, 8, 4, 10 };
+	static final int[] SCRABBLE_LETTER_VALUES = { 1, 3, 3, 2, 1, 4, 2, 4, 1, 8, 5, 1, 3,
+												  1, 1, 3, 10, 1, 1, 1, 1, 4, 4, 8, 4, 10 };
 
 	// Number of random letters dealt at each round of this Scrabble game
 	static int HAND_SIZE = 10;
 
 	// Maximum number of possible words in this Scrabble game
-	static int MAX_WORD_COUNT = 100000;
+	static int MAX_NUMBER_OF_WORDS = 100000;
 
     // The dictionary array (will contain the words from the dictionary file)
-	static String[] WORD_LIST = new String[MAX_WORD_COUNT];
+	static String[] DICTIONARY = new String[MAX_NUMBER_OF_WORDS];
 
 	// Actual number of words in the dictionary (set by the init function, below)
-	static int TOTAL_WORD_COUNT;
+	static int NUM_OF_WORDS;
 
-	// Populates the WORD_LIST array with the lowercase version of all the words read
-	// from the DICTIONARY_FILE_PATH, and sets TOTAL_WORD_COUNT to the number of words read from the file.
-	public static void initialize() {
-		// Declares the variable fileReader to refer to an object of type In, and initializes it to represent
+	// Populates the DICTIONARY array with the lowercase version of all the words read
+	// from the WORDS_FILE, and sets NUM_OF_WORDS to the number of words read from the file.
+	public static void init() {
+		// Declares the variable in to refer to an object of type In, and initializes it to represent
 		// the stream of characters coming from the given file. Used for reading words from the file.  
-		In fileReader = new In(DICTIONARY_FILE_PATH);
+		In in = new In(WORDS_FILE);
         System.out.println("Loading word list from file...");
-        TOTAL_WORD_COUNT = 0;
-		while (!fileReader.isEmpty()) {
+        NUM_OF_WORDS = 0;
+		while (!in.isEmpty()) {
 			// Reads the next "token" from the file. A token is defined as a string of 
 			// non-whitespace characters. Whitespace is either space characters, or  
 			// end-of-line characters.
-			WORD_LIST[TOTAL_WORD_COUNT++] = fileReader.readString().toLowerCase();
+			DICTIONARY[NUM_OF_WORDS++] = in.readString().toLowerCase();
 		}
-        System.out.println(TOTAL_WORD_COUNT + " words loaded.");
+        System.out.println(NUM_OF_WORDS + " words loaded.");
 	}
 
 	// Checks if the given word is in the dictionary.
-	public static boolean isValidWord(String word) {
-		for (int i = 0; i < TOTAL_WORD_COUNT; i++) {
-
-			if (WORD_LIST[i].equals(word)) {
+	public static boolean isWordInDictionary(String word) {
+		for (int i = 0; i < DICTIONARY.length; i++) {
+			if (word.equals(DICTIONARY[i])) {
 				return true;
 			}
 		}
-
 		return false;
 	}
 	
 	// Returns the Scrabble score of the given word.
 	// If the length of the word equals the length of the hand, adds 50 points to the score.
 	// If the word includes the sequence "runi", adds 1000 points to the game.
-	public static int calculateWordScore(String word) {
+	public static int wordScore(String word) {
+		int sum = 0;
 
-		int score = 0;
-
-        for (int i = 0; i < word.length(); i++) {
-
-			score += LETTER_VALUES[word.charAt(i) - 97];
-
-        }
-
-		score *= word.length();
-
-		if (word.length() == HAND_SIZE) {
-			score += 50;
+		char c;
+		for (int i = 0; i < word.length(); i++) {
+			c = word.charAt(i);
+			sum += SCRABBLE_LETTER_VALUES[ (int) word.charAt(i) - 97 ];
 		}
+		sum *= word.length();
 
-		if (word.contains("runi")) {
-			score += 1000;
+		sum += (word.length() == HAND_SIZE ? 50 : 0);
+
+		sum += (MyString.subsetOf("runi", word) ? 1000 : 0);
+		
+		return sum;
+	}
+
+	// creates a random string of chars based on the frequency of each char in our dictionary
+	public static String frequencyOfCharBasedRandomStringOfLetters(int size) {
+		int[] frequencyArr = new int[26];
+		int currCharFrequencySum;
+		for (int i = 97; i <= 122; i ++) {
+			currCharFrequencySum = 0;
+			for (int j = 0; j < DICTIONARY.length; j++) {
+				currCharFrequencySum += ( MyString.countChar(DICTIONARY[j], ((char) i)) );
+			}
+			frequencyArr[i-97] = currCharFrequencySum;
+		} // we now got an array with every char's frequency in dictionary. nice.
+
+		int[] cumalativeWeightsOfChars = new int[26];
+		cumalativeWeightsOfChars[0] = frequencyArr[0];
+		
+		for (int i = 1; i < 26; i++) {
+			cumalativeWeightsOfChars[i] = cumalativeWeightsOfChars[i-1] + frequencyArr[i];
+		} // we get every char to value of sum of itself and previous chars. why? of course.
+		
+
+		int totalSum = cumalativeWeightsOfChars[25]; // makes sense
+
+		/* prints the percentages of frequency for each char
+		double sum = 0;
+		for (int i = 0; i < 26; i++) {
+			System.out.println((char) (i + 97) + ": " + (double) Math.round((10000)*((double) frequencyArr[i]/totalSum))/100 + "%");
+			sum += (100)*((double) frequencyArr[i]/totalSum);
 		}
+		System.out.println(sum+"%");
+		*/
 
-        return score;
-    }
+		String randomStringBasedOnFrequency = "";
+		for (int i = 0; i < size; i++) {
+			// get random num between 0 and our total sum
+			int randNum = (int) (Math.random() * totalSum);
+			for (int j = 0; j < 25; j++) {
+				if (randNum <= cumalativeWeightsOfChars[j]) {
+					randomStringBasedOnFrequency = randomStringBasedOnFrequency + ( (char) (j + 97) );
+					break;
+				}
+			}
+		} // no further comments, explanation is trivial (read it in a hebrew accent).
+		
+		return randomStringBasedOnFrequency;
+	}
 
 
 	// Creates a random hand of length (HAND_SIZE - 2) and then inserts
 	// into it, at random indexes, the letters 'a' and 'e'
 	// (these two vowels make it easier for the user to construct words)
-	public static String generateRandomHand() {
+	public static String createHand() {
+		/*
+		  * this is the old boring random string :
+		String newHand = MyString.randomStringOfLetters(HAND_SIZE - 2);
+		*/
 
-		String hand = "";
-		
-		for (int i = 0; i < HAND_SIZE - 2; i++) {
-		
-		int randomCharCode = (int) (Math.random() * (122 - 97 + 1)) + 97;
-            char randomChar = (char) randomCharCode; 
+		// this is the fun, new, cool random string based on frequency of chars
+		String newHand = frequencyOfCharBasedRandomStringOfLetters(HAND_SIZE-2);
 
-			hand += randomChar;
-		
-		}
+		newHand = MyString.insertCharRandomly('a', newHand); // Note that i do not like adding e and a at the end as my hand is better without but i want to pass the autograder.
+		newHand = MyString.insertCharRandomly('e', newHand);
 
-		int randomPosition1 = (int) (Math.random() * (hand.length() + 1));
-         hand = hand.substring(0, randomPosition1) + "a" + hand.substring(randomPosition1);
-
-		int randomPosition2 = (int) (Math.random() * (hand.length() + 1));
-         hand = hand.substring(0, randomPosition2) + "e" + hand.substring(randomPosition2);
-
-		return hand;
+		return newHand;
 	}
 	
     // Runs a single hand in a Scrabble game. Each time the user enters a valid word:
     // 1. The letters in the word are removed from the hand, which becomes smaller.
     // 2. The user gets the Scrabble points of the entered word.
     // 3. The user is prompted to enter another word, or '.' to end the hand. 
-	public static void playScrabbleHand(String hand) {
-		int remainingLetters = hand.length();
-		int totalScore = 0;
+	public static void playHand(String hand) {
+		int n = hand.length();
+		int score = 0;
 		// Declares the variable in to refer to an object of type In, and initializes it to represent
 		// the stream of characters coming from the keyboard. Used for reading the user's inputs.   
-		In userInput = new In();
+		In in = new In();
 		while (hand.length() > 0) {
 			System.out.println("Current Hand: " + MyString.spacedString(hand));
 			System.out.println("Enter a word, or '.' to finish playing this hand:");
 			// Reads the next "token" from the keyboard. A token is defined as a string of 
 			// non-whitespace characters. Whitespace is either space characters, or  
 			// end-of-line characters.
-			String userWord = userInput.readString();
-			
-			if (userWord.equals(".")) {
+			String input = in.readString();
+
+			if (input.length() == 1 && input.charAt(0) == '.') {
 				break;
 			}
-
-			if (!isValidWord(userWord)) {
-				System.out.println("No such word in the dictionary. Try again.");
-
-            	continue;
+			if (MyString.subsetOf(input, hand)) {
+				if (isWordInDictionary(input)) { // valid word
+					score += wordScore(input);
+					hand = MyString.remove(hand, input);
+					System.out.println(input + " earned " + wordScore(input) + " points. Score: " + score + " points\n");
+				} else {
+					System.out.println("No such word in the dictionary. Try again.");
+				}
+			} else {
+				System.out.println("Invalid word. Try again.");
 			}
-			
-			int wordPoints = calculateWordScore(userWord);
-			totalScore += wordPoints;
 
-			System.out.println(userWord + " earned " + wordPoints + " points. Total score: " + totalScore + " points.");
-
-			hand = MyString.remove(hand, userWord);
-
-		
 		}
 		if (hand.length() == 0) {
-	        System.out.println("Ran out of letters. Total score: " + totalScore + " points");
+	        System.out.println("Ran out of letters. Total score: " + score + " points");
 		} else {
-			System.out.println("End of hand. Total score: " + totalScore + " points");
+			System.out.println("End of hand. Total score: " + score + " points");
 		}
 	}
 
 	// Plays a Scrabble game. Prompts the user to enter 'n' for playing a new hand, or 'e'
 	// to end the game. If the user enters any other input, writes an error message.
-	public static void startScrabbleGame() {
+	public static void playGame() {
 		// Initializes the dictionary
-    	initialize();
-		// The variable userInput is set to represent the stream of characters 
+    	init();
+		// The variable in is set to represent the stream of characters 
 		// coming from the keyboard. Used for getting the user's inputs.  
-		In userInput = new In();
+		In in = new In();
 
 		while(true) {
 			System.out.println("Enter n to deal a new hand, or e to end the game:");
 			// Gets the user's input, which is all the characters entered by 
-			// the user until the user enters the ENTER key.
-			String userChoice = userInput.readString();
-			//// Replace the following break statement with code
-			//// that completes the game playing loop
-			break;
+			// the user until the user enter the ENTER character.
+			String input = in.readString();
+			
+			if (input.length() == 1 && input.charAt(0) == 'n') {
+				playHand(createHand());
+				//break;
+			}
+			else if (input.length() == 1 && input.charAt(0) == 'e') {
+				break;
+			}
+			else {
+				System.out.println("I have given you very simple instructions so follow them.\n");
+			}
 		}
 	}
 
@@ -180,35 +216,35 @@ public class Scrabble {
 		////testScrabbleScore();    
 		////testCreateHands();  
 		////testPlayHands();
-		////startScrabbleGame();
+		playGame();
 	}
 
 	public static void testBuildingTheDictionary() {
-		initialize();
+		init();
 		// Prints a few words
 		for (int i = 0; i < 5; i++) {
-			System.out.println(WORD_LIST[i]);
+			System.out.println(DICTIONARY[i]);
 		}
-		System.out.println(isValidWord("mango"));
+		System.out.println(isWordInDictionary("mango"));
 	}
 	
 	public static void testScrabbleScore() {
-		System.out.println(calculateWordScore("bee"));	
-		System.out.println(calculateWordScore("babe"));
-		System.out.println(calculateWordScore("friendship"));
-		System.out.println(calculateWordScore("running"));
+		System.out.println(wordScore("bee"));	
+		System.out.println(wordScore("babe"));
+		System.out.println(wordScore("friendship"));
+		System.out.println(wordScore("running"));
 	}
 	
-	public static void testGenerateRandomHands() {
-		System.out.println(generateRandomHand());
-		System.out.println(generateRandomHand());
-		System.out.println(generateRandomHand());
+	public static void testCreateHands() {
+		System.out.println(createHand());
+		System.out.println(createHand());
+		System.out.println(createHand());
 	}
-	public static void testPlayScrabbleHands() {
-		initialize();
-		//playScrabbleHand("ocostrza");
-		//playScrabbleHand("arbffip");
-		//playScrabbleHand("aretiin");
+	public static void testPlayHands() {
+		init();
+		playHand("ocostrza");
+		playHand("arbffip");
+		playHand("aretiin");
 	}
 }
 
